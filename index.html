@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>React Visual Builder</title>
+    <title>React Visual Builder - Auto Save & Load</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
 </head>
@@ -19,11 +19,65 @@
     </web-app>
     <script>
         setTimeout(() => {
-            loadModule('blocks/index.js').then(module => {
+            loadModule('index.js').then(module => {
                 let blocks = module.default;
                 let WebApp = document.querySelector('web-app');
+                
+                // Load tree from localStorage
+                const savedTree = localStorage.getItem('visualEditorTree');
+                console.log('Saved tree from localStorage:', savedTree);
+                
+                let initialTree = null;
+                if (savedTree) {
+                    try {
+                        initialTree = JSON.parse(savedTree);
+                        console.log('Parsed tree:', initialTree);
+                        console.log('Tree type:', initialTree.type);
+                        console.log('Tree children:', initialTree.children);
+                    } catch (e) {
+                        console.error('Failed to parse saved tree:', e);
+                    }
+                }
+                
+                // Set the blocks first
                 WebApp.setProps({ 'blocks': blocks });
+                
+                // Set the visual component
                 WebApp.setAttribute('url', 'visual.jsx');
+                
+                // Handle tree changes - auto save to localStorage
+                WebApp.setProps({
+                    'onChange': (tree) => {
+                        localStorage.setItem('visualEditorTree', JSON.stringify(tree));
+                    },
+                    'onExportJson': (tree) => {
+                        // Download JSON file
+                        const blob = new Blob([JSON.stringify(tree, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'visual-editor-tree.json';
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    },
+                    'onExportJsx': (jsx) => {
+                        const blob = new Blob([jsx], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'visual-editor.jsx';
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    }
+                });
+                
+                // Try to set initialTree after a delay
+                if (initialTree) {
+                    setTimeout(() => {
+                        console.log('Setting initialTree...');
+                        WebApp.setProps({ 'initialTree': initialTree });
+                    }, 1000);
+                }
             });
         }, 5000);
     </script>

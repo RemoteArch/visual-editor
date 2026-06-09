@@ -3,6 +3,7 @@ export const json_config = {
   label: "Text Editor",
   category: "Basic",
   description: "Rich text content",
+  icon: "fa-solid fa-align-left",
   acceptsChildren: false,
   props: {
     content: {
@@ -10,14 +11,26 @@ export const json_config = {
       label: "Content",
       default: "Write your content here. This is a text editor block that supports paragraphs, lists, and more."
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "text-base text-gray-600 leading-relaxed"
+    fontSize: {
+      type: "select",
+      label: "Font Size",
+      default: "16",
+      options: ["14", "16", "18", "20"]
+    },
+    color: {
+      type: "color",
+      label: "Color",
+      default: "#4b5563"
+    },
+    lineHeight: {
+      type: "select",
+      label: "Line Height",
+      default: "1.75",
+      options: ["1.5", "1.6", "1.75", "2"]
     }
   }
 };
 
-export default function TextEditor({ content = "Write your content here. This is a text editor block that supports paragraphs, lists, and more.", className = "text-base text-gray-600 leading-relaxed" }) {
-  return <div className={className} dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br/>') }} />;
+export default function TextEditor({ content = "Write your content here. This is a text editor block that supports paragraphs, lists, and more.", fontSize = "16", color = "#4b5563", lineHeight = "1.75" }) {
+  return <div style={{ fontSize: `${fontSize}px`, color, lineHeight }} dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br/>') }} />;
 }

@@ -3,6 +3,7 @@ export const json_config = {
   label: "Map",
   category: "Media",
   description: "Google Maps embed",
+  icon: "fa-solid fa-map-location-dot",
   acceptsChildren: false,
   props: {
     address: {
@@ -18,21 +19,16 @@ export const json_config = {
     },
     height: {
       type: "select",
-      label: "Height",
+      label: "Height (px)",
       default: "400",
       options: ["300", "400", "500", "600"]
-    },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "w-full"
     }
   }
 };
 
-export default function Map({ address = "1600 Amphitheatre Parkway, Mountain View, CA", zoom = 15, height = "400", className = "w-full" }) {
+export default function Map({ address = "1600 Amphitheatre Parkway, Mountain View, CA", zoom = 15, height = "400" }) {
   return (
-    <div className={className} style={{ height: `${height}px` }}>
+    <div style={{ width: "100%", height: `${height}px` }}>
       <iframe
         width="100%"
         height="100%"

@@ -3,6 +3,7 @@ export const json_config = {
   label: "Icon Box",
   category: "Basic",
   description: "Icon with text box",
+  icon: "fa-solid fa-box",
   acceptsChildren: false,
   props: {
     icon: {
@@ -27,15 +28,21 @@ export const json_config = {
       default: "top",
       options: ["top", "left", "right"]
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "p-6 bg-white rounded-lg shadow-md text-center"
+    backgroundColor: {
+      type: "color",
+      label: "Background Color",
+      default: "#ffffff"
+    },
+    padding: {
+      type: "select",
+      label: "Padding",
+      default: "24",
+      options: ["16", "24", "32"]
     }
   }
 };
 
-export default function IconBox({ icon = "star", title = "Icon Box Title", description = "Add a description for your icon box", position = "top", className = "p-6 bg-white rounded-lg shadow-md text-center" }) {
+export default function IconBox({ icon = "star", title = "Icon Box Title", description = "Add a description for your icon box", position = "top", backgroundColor = "#ffffff", padding = "24" }) {
   const icons = {
     star: "★",
     heart: "♥",
@@ -71,17 +78,14 @@ export default function IconBox({ icon = "star", title = "Icon Box Title", descr
     error: "✖",
     success: "✓"
   };
-  const layoutStyles = {
-    top: "flex-col",
-    left: "flex-row",
-    right: "flex-row-reverse"
-  };
+  const flexDirection = position === "top" ? "column" : position === "left" ? "row" : "row-reverse";
+  const textAlign = position === "top" ? "center" : "left";
   return (
-    <div className={`flex ${layoutStyles[position]} items-center gap-4 ${className}`}>
-      <span className="text-4xl text-indigo-600">{icons[icon] || "★"}</span>
+    <div style={{ display: "flex", flexDirection, alignItems: "center", gap: "16px", padding: `${padding}px`, backgroundColor, borderRadius: "8px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)", textAlign }}>
+      <span style={{ fontSize: "36px", color: "#4f46e5" }}>{icons[icon] || "★"}</span>
       <div>
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        <p className="text-gray-600">{description}</p>
+        <h3 style={{ fontSize: "18px", fontWeight: "600", color: "#111827" }}>{title}</h3>
+        <p style={{ color: "#4b5563" }}>{description}</p>
       </div>
     </div>
   );

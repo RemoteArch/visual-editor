@@ -3,6 +3,7 @@ export const json_config = {
   label: "Alert",
   category: "Basic",
   description: "Alert message box",
+  icon: "fa-solid fa-triangle-exclamation",
   acceptsChildren: false,
   props: {
     type: {
@@ -25,30 +26,26 @@ export const json_config = {
       type: "boolean",
       label: "Dismissible",
       default: false
-    },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "p-4 rounded-lg"
     }
   }
 };
 
-export default function Alert({ type = "info", title = "Information", content = "This is an alert message", dismissible = false, className = "p-4 rounded-lg" }) {
+export default function Alert({ type = "info", title = "Information", content = "This is an alert message", dismissible = false }) {
   const typeStyles = {
-    info: "bg-blue-50 border-blue-200 text-blue-800",
-    success: "bg-green-50 border-green-200 text-green-800",
-    warning: "bg-yellow-50 border-yellow-200 text-yellow-800",
-    error: "bg-red-50 border-red-200 text-red-800"
+    info: { bg: "#eff6ff", border: "#bfdbfe", text: "#1e40af" },
+    success: { bg: "#f0fdf4", border: "#bbf7d0", text: "#166534" },
+    warning: { bg: "#fefce8", border: "#fef9c3", text: "#854d0e" },
+    error: { bg: "#fef2f2", border: "#fecaca", text: "#991b1b" }
   };
+  const style = typeStyles[type];
   return (
-    <div className={`border ${typeStyles[type]} ${className}`}>
-      <div className="flex">
-        <div className="flex-1">
-          {title && <h4 className="font-semibold">{title}</h4>}
+    <div style={{ backgroundColor: style.bg, border: `1px solid ${style.border}`, color: style.text, padding: "16px", borderRadius: "8px" }}>
+      <div style={{ display: "flex" }}>
+        <div style={{ flex: 1 }}>
+          {title && <h4 style={{ fontWeight: "600" }}>{title}</h4>}
           <p>{content}</p>
         </div>
-        {dismissible && <button className="ml-4">×</button>}
+        {dismissible && <button style={{ marginLeft: "16px", cursor: "pointer" }}>×</button>}
       </div>
     </div>
   );

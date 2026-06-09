@@ -3,6 +3,7 @@ export const json_config = {
   label: "Grid",
   category: "Layout",
   description: "CSS Grid container",
+  icon: "fa-solid fa-table-cells",
   acceptsChildren: true,
   props: {
     cols: {
@@ -17,25 +18,21 @@ export const json_config = {
     },
     gap: {
       type: "select",
-      label: "Gap",
-      default: "4",
-      options: ["0", "2", "4", "6", "8", "12"]
-    },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: ""
+      label: "Gap (px)",
+      default: "16",
+      options: ["0", "8", "16", "24", "32"]
     }
   }
 };
 
-export default function Grid({ children, cols = "3", rows = "auto", gap = "4", className = "" }) {
+export default function Grid({ children, cols = "3", rows = "auto", gap = "16" }) {
   return (
     <div
-      className={`grid gap-${gap} ${className}`}
       style={{
+        display: "grid",
         gridTemplateColumns: cols,
-        gridTemplateRows: rows
+        gridTemplateRows: rows,
+        gap: `${gap}px`
       }}
     >
       {children}

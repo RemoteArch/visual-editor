@@ -3,6 +3,7 @@ export const json_config = {
   label: "Search Bar",
   category: "Widgets",
   description: "Search input",
+  icon: "fa-solid fa-magnifying-glass",
   acceptsChildren: false,
   props: {
     placeholder: {
@@ -15,24 +16,56 @@ export const json_config = {
       label: "Show Button",
       default: true
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "flex gap-2"
+    gap: {
+      type: "select",
+      label: "Gap (px)",
+      default: "8",
+      options: ["0", "4", "8", "12", "16"]
+    },
+    borderColor: {
+      type: "color",
+      label: "Border Color",
+      default: "#d1d5db"
+    },
+    borderRadius: {
+      type: "select",
+      label: "Border Radius",
+      default: "8",
+      options: ["0", "4", "8", "12"]
+    },
+    buttonColor: {
+      type: "color",
+      label: "Button Color",
+      default: "#4f46e5"
     }
   }
 };
 
-export default function SearchBar({ placeholder = "Search...", button = true, className = "flex gap-2" }) {
+export default function SearchBar({ placeholder = "Search...", button = true, gap = "8", borderColor = "#d1d5db", borderRadius = "8", buttonColor = "#4f46e5" }) {
   return (
-    <div className={className}>
+    <div style={{ display: "flex", gap: `${gap}px` }}>
       <input
         type="text"
         placeholder={placeholder}
-        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        style={{
+          flex: 1,
+          padding: "8px 16px",
+          border: `1px solid ${borderColor}`,
+          borderRadius: `${borderRadius}px`,
+          outline: "none"
+        }}
       />
       {button && (
-        <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        <button 
+          style={{
+            padding: "8px 16px",
+            backgroundColor: buttonColor,
+            color: "#ffffff",
+            borderRadius: `${borderRadius}px`,
+            cursor: "pointer",
+            border: "none"
+          }}
+        >
           Search
         </button>
       )}

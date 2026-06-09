@@ -3,6 +3,7 @@ export const json_config = {
   label: "Gallery",
   category: "Media",
   description: "Image gallery",
+  icon: "fa-solid fa-images",
   acceptsChildren: false,
   props: {
     images: {
@@ -18,30 +19,25 @@ export const json_config = {
     },
     gap: {
       type: "select",
-      label: "Gap",
-      default: "4",
-      options: ["0", "2", "4", "6", "8"]
+      label: "Gap (px)",
+      default: "16",
+      options: ["0", "8", "16", "24", "32"]
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: ""
+    borderRadius: {
+      type: "select",
+      label: "Border Radius",
+      default: "8",
+      options: ["0", "4", "8", "12", "16"]
     }
   }
 };
 
-export default function Gallery({ images = "https://placehold.co/400x300\nhttps://placehold.co/400x300\nhttps://placehold.co/400x300\nhttps://placehold.co/400x300", columns = 2, gap = 4, className = "" }) {
+export default function Gallery({ images = "https://placehold.co/400x300\nhttps://placehold.co/400x300\nhttps://placehold.co/400x300\nhttps://placehold.co/400x300", columns = 2, gap = "16", borderRadius = "8" }) {
   const imageList = typeof images === "string" ? images.split("\n").filter(i => i.trim()) : images;
-  const gridCols = {
-    1: "grid-cols-1",
-    2: "grid-cols-1 md:grid-cols-2",
-    3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
-    4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
-  };
   return (
-    <div className={`grid ${gridCols[columns]} gap-${gap} ${className}`}>
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(${columns}, 1fr)`, gap: `${gap}px` }}>
       {imageList.map((img, index) => (
-        <img key={index} src={img} alt={`Gallery ${index + 1}`} className="w-full h-auto rounded-lg" />
+        <img key={index} src={img} alt={`Gallery ${index + 1}`} style={{ width: "100%", height: "auto", borderRadius: `${borderRadius}px` }} />
       ))}
     </div>
   );

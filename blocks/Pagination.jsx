@@ -3,6 +3,7 @@ export const json_config = {
   label: "Pagination",
   category: "Widgets",
   description: "Pagination controls",
+  icon: "fa-solid fa-angles-left-right",
   acceptsChildren: false,
   props: {
     currentPage: {
@@ -15,15 +16,27 @@ export const json_config = {
       label: "Total Pages",
       default: 10
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "flex gap-2"
+    gap: {
+      type: "select",
+      label: "Gap (px)",
+      default: "8",
+      options: ["0", "4", "8", "12", "16"]
+    },
+    activeColor: {
+      type: "color",
+      label: "Active Color",
+      default: "#4f46e5"
+    },
+    borderRadius: {
+      type: "select",
+      label: "Border Radius",
+      default: "4",
+      options: ["0", "4", "8"]
     }
   }
 };
 
-export default function Pagination({ currentPage = 1, totalPages = 10, className = "flex gap-2" }) {
+export default function Pagination({ currentPage = 1, totalPages = 10, gap = "8", activeColor = "#4f46e5", borderRadius = "4" }) {
   const pages = [];
   for (let i = 1; i <= totalPages; i++) {
     if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
@@ -32,20 +45,33 @@ export default function Pagination({ currentPage = 1, totalPages = 10, className
       pages.push("...");
     }
   }
-  
+
   return (
-    <div className={className}>
-      <button className="px-3 py-1 rounded hover:bg-gray-100" disabled={currentPage === 1}>◀</button>
+    <div style={{ display: "flex", gap: `${gap}px` }}>
+      <button 
+        style={{ padding: "4px 12px", borderRadius: `${borderRadius}px`, cursor: "pointer", border: "1px solid #e5e7eb", background: "white" }}
+        disabled={currentPage === 1}
+      >◀</button>
       {pages.map((page, index) => (
         <button
           key={index}
-          className={`px-3 py-1 rounded ${page === currentPage ? "bg-indigo-600 text-white" : "hover:bg-gray-100"}`}
+          style={{
+            padding: "4px 12px",
+            borderRadius: `${borderRadius}px`,
+            cursor: page === "..." ? "default" : "pointer",
+            backgroundColor: page === currentPage ? activeColor : "white",
+            color: page === currentPage ? "white" : "#111827",
+            border: "1px solid #e5e7eb"
+          }}
           disabled={page === "..."}
         >
           {page}
         </button>
       ))}
-      <button className="px-3 py-1 rounded hover:bg-gray-100" disabled={currentPage === totalPages}>▶</button>
+      <button 
+        style={{ padding: "4px 12px", borderRadius: `${borderRadius}px`, cursor: "pointer", border: "1px solid #e5e7eb", background: "white" }}
+        disabled={currentPage === totalPages}
+      >▶</button>
     </div>
   );
 }

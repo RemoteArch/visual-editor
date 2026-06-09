@@ -5,44 +5,57 @@ export const json_config = {
   label: "Accordion",
   category: "Advanced",
   description: "Collapsible accordion",
-  acceptsChildren: false,
+  icon: "fa-solid fa-angles-up-down",
+  acceptsChildren: true,
   props: {
-    items: {
+    titles: {
       type: "textarea",
-      label: "Items (format: Title|Content per line)",
-      default: "Item 1|Content for item 1\nItem 2|Content for item 2\nItem 3|Content for item 3"
+      label: "Item Titles (one per line)",
+      default: "Item 1\nItem 2\nItem 3"
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: ""
+    borderColor: {
+      type: "color",
+      label: "Border Color",
+      default: "#e5e7eb"
+    },
+    textColor: {
+      type: "color",
+      label: "Text Color",
+      default: "#4b5563"
     }
   }
 };
 
-export default function Accordion({ items = "Item 1|Content for item 1\nItem 2|Content for item 2\nItem 3|Content for item 3", className = "" }) {
+export default function Accordion({ children, titles = "Item 1\nItem 2\nItem 3", borderColor = "#e5e7eb", textColor = "#4b5563" }) {
   const [openIndex, setOpenIndex] = React.useState(0);
-  const itemList = typeof items === "string"
-    ? items.split("\n").filter(i => i.trim()).map(i => {
-      const [title, content] = i.split("|");
-      return { title: title?.trim() || "Item", content: content?.trim() || "" };
-    })
-    : items;
-  
+  const childArray = React.Children.toArray(children);
+  const titleList = typeof titles === "string" ? titles.split("\n").filter(t => t.trim()) : titles;
+
   return (
-    <div className={className}>
-      {itemList.map((item, index) => (
-        <div key={index} className="border border-gray-200 rounded-lg mb-2">
+    <div>
+      {childArray.map((child, index) => (
+        <div key={index} style={{ border: `1px solid ${borderColor}`, borderRadius: "8px", marginBottom: "8px" }}>
           <button
             onClick={() => setOpenIndex(openIndex === index ? -1 : index)}
-            className="w-full px-4 py-3 text-left font-medium flex justify-between items-center"
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              textAlign: "left",
+              fontWeight: "500",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              background: "none",
+              border: "none",
+              cursor: "pointer"
+            }}
           >
-            {item.title}
+            {titleList[index] || `Item ${index + 1}`}
             <span>{openIndex === index ? "−" : "+"}</span>
           </button>
           {openIndex === index && (
-            <div className="px-4 pb-4 pt-2 text-gray-600">
-              {item.content}
+            <div style={{ padding: "16px", color: textColor }}>
+              {child}
             </div>
           )}
         </div>

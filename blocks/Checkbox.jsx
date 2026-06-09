@@ -3,6 +3,7 @@ export const json_config = {
   label: "Checkbox",
   category: "Forms",
   description: "Checkbox input",
+  icon: "fa-solid fa-square-check",
   acceptsChildren: false,
   props: {
     label: {
@@ -20,19 +21,25 @@ export const json_config = {
       label: "Required",
       default: false
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: ""
+    fontSize: {
+      type: "select",
+      label: "Font Size",
+      default: "14",
+      options: ["12", "14", "16"]
+    },
+    color: {
+      type: "color",
+      label: "Text Color",
+      default: "#374151"
     }
   }
 };
 
-export default function Checkbox({ label = "Accept terms and conditions", checked = false, required = false, className = "" }) {
+export default function Checkbox({ label = "Accept terms and conditions", checked = false, required = false, fontSize = "14", color = "#374151" }) {
   return (
-    <label className={`flex items-center gap-2 ${className}`}>
-      <input type="checkbox" defaultChecked={checked} required={required} className="w-4 h-4 text-indigo-600 rounded" />
-      <span className="text-sm text-gray-700">{label}</span>
+    <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <input type="checkbox" defaultChecked={checked} required={required} style={{ width: "16px", height: "16px" }} />
+      <span style={{ fontSize: `${fontSize}px`, color }}>{label}</span>
     </label>
   );
 }

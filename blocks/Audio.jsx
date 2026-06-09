@@ -3,24 +3,20 @@ export const json_config = {
   label: "Audio",
   category: "Media",
   description: "Audio player",
+  icon: "fa-solid fa-volume-high",
   acceptsChildren: false,
   props: {
     src: {
       type: "string",
       label: "Audio URL",
       default: ""
-    },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "w-full"
     }
   }
 };
 
-export default function Audio({ src = "", className = "w-full" }) {
+export default function Audio({ src = "" }) {
   return (
-    <audio controls className={className}>
+    <audio controls style={{ width: "100%" }}>
       <source src={src} type="audio/mpeg" />
       Your browser does not support the audio element.
     </audio>

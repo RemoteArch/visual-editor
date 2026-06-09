@@ -3,16 +3,27 @@ export const json_config = {
   label: "Inner Section",
   category: "Layout",
   description: "Inner section for nested layouts",
+  icon: "fa-solid fa-square",
   acceptsChildren: true,
   props: {
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "py-12 bg-gray-50"
+    paddingY: {
+      type: "select",
+      label: "Padding Y",
+      default: "48",
+      options: ["0", "20", "40", "48", "60", "80"]
+    },
+    backgroundColor: {
+      type: "color",
+      label: "Background Color",
+      default: "#f9fafb"
     }
   }
 };
 
-export default function InnerSection({ children, className = "py-12 bg-gray-50" }) {
-  return <div className={className}>{children}</div>;
+export default function InnerSection({ children, paddingY = "48", backgroundColor = "#f9fafb" }) {
+  return (
+    <div style={{ padding: `${paddingY}px 0`, backgroundColor }}>
+      {children}
+    </div>
+  );
 }

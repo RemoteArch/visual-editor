@@ -3,6 +3,7 @@ export const json_config = {
   label: "Copyright",
   category: "Widgets",
   description: "Copyright notice",
+  icon: "fa-solid fa-copyright",
   acceptsChildren: false,
   props: {
     text: {
@@ -10,14 +11,26 @@ export const json_config = {
       label: "Copyright Text",
       default: "© 2024 Your Company. All rights reserved."
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "text-sm text-gray-500 text-center"
+    fontSize: {
+      type: "select",
+      label: "Font Size",
+      default: "14",
+      options: ["12", "14", "16"]
+    },
+    color: {
+      type: "color",
+      label: "Color",
+      default: "#6b7280"
+    },
+    textAlign: {
+      type: "select",
+      label: "Text Align",
+      default: "center",
+      options: ["left", "center", "right"]
     }
   }
 };
 
-export default function Copyright({ text = "© 2024 Your Company. All rights reserved.", className = "text-sm text-gray-500 text-center" }) {
-  return <div className={className}>{text}</div>;
+export default function Copyright({ text = "© 2024 Your Company. All rights reserved.", fontSize = "14", color = "#6b7280", textAlign = "center" }) {
+  return <div style={{ fontSize: `${fontSize}px`, color, textAlign }}>{text}</div>;
 }

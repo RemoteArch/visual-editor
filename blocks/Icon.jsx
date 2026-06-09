@@ -3,6 +3,7 @@ export const json_config = {
   label: "Icon",
   category: "Basic",
   description: "Icon element",
+  icon: "fa-solid fa-star",
   acceptsChildren: false,
   props: {
     icon: {
@@ -21,16 +22,11 @@ export const json_config = {
       type: "color",
       label: "Color",
       default: "#4f46e5"
-    },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: ""
     }
   }
 };
 
-export default function Icon({ icon = "star", size = "24", color = "#4f46e5", className = "" }) {
+export default function Icon({ icon = "star", size = "24", color = "#4f46e5" }) {
   const icons = {
     star: "★",
     heart: "♥",
@@ -68,8 +64,7 @@ export default function Icon({ icon = "star", size = "24", color = "#4f46e5", cl
   };
   return (
     <span
-      className={`inline-flex items-center justify-center ${className}`}
-      style={{ fontSize: `${size}px`, color }}
+      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: `${size}px`, color }}
     >
       {icons[icon] || "★"}
     </span>

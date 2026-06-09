@@ -3,6 +3,7 @@ export const json_config = {
   label: "Columns",
   category: "Layout",
   description: "Grid columns layout",
+  icon: "fa-solid fa-table-columns",
   acceptsChildren: true,
   props: {
     columns: {
@@ -13,28 +14,29 @@ export const json_config = {
     },
     gap: {
       type: "select",
-      label: "Gap",
-      default: "8",
-      options: ["0", "4", "6", "8", "12"]
-    },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: ""
+      label: "Gap (px)",
+      default: "32",
+      options: ["0", "16", "24", "32", "48"]
     }
   }
 };
 
-export default function Columns({ children, columns = "2", gap = "8", className = "" }) {
+export default function Columns({ children, columns = "2", gap = "32" }) {
   const gridCols = {
-    1: "grid-cols-1",
-    2: "grid-cols-1 md:grid-cols-2",
-    3: "grid-cols-1 md:grid-cols-3",
-    4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
-    6: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+    1: "repeat(1, minmax(0, 1fr))",
+    2: "repeat(2, minmax(0, 1fr))",
+    3: "repeat(3, minmax(0, 1fr))",
+    4: "repeat(4, minmax(0, 1fr))",
+    6: "repeat(6, minmax(0, 1fr))"
   };
   return (
-    <div className={`grid ${gridCols[columns]} gap-${gap} ${className}`}>
+    <div 
+      style={{
+        display: "grid",
+        gridTemplateColumns: gridCols[columns],
+        gap: `${gap}px`
+      }}
+    >
       {children}
     </div>
   );

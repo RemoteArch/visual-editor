@@ -3,6 +3,7 @@ export const json_config = {
   label: "Heading",
   category: "Basic",
   description: "Heading text with customizable level",
+  icon: "fa-solid fa-heading",
   acceptsChildren: false,
   props: {
     text: {
@@ -22,21 +23,31 @@ export const json_config = {
       default: "left",
       options: ["left", "center", "right", "justify"]
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "text-4xl font-bold text-gray-900"
+    fontSize: {
+      type: "select",
+      label: "Font Size",
+      default: "36",
+      options: ["24", "30", "36", "48", "60"]
+    },
+    fontWeight: {
+      type: "select",
+      label: "Font Weight",
+      default: "700",
+      options: ["400", "500", "600", "700", "800"]
+    },
+    color: {
+      type: "color",
+      label: "Color",
+      default: "#111827"
     }
   }
 };
 
-export default function Heading({ text = "Your Heading Here", level = "h2", className = "text-4xl font-bold text-gray-900", align = "left" }) {
+export default function Heading({ text = "Your Heading Here", level = "h2", align = "left", fontSize = "36", fontWeight = "700", color = "#111827" }) {
   const Tag = level || "h2";
-  const alignClass = {
-    left: "text-left",
-    center: "text-center",
-    right: "text-right",
-    justify: "text-justify"
-  }[align] || "text-left";
-  return <Tag className={`${className} ${alignClass}`}>{text}</Tag>;
+  return (
+    <Tag style={{ textAlign: align, fontSize: `${fontSize}px`, fontWeight, color }}>
+      {text}
+    </Tag>
+  );
 }

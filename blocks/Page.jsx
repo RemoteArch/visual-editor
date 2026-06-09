@@ -6,14 +6,20 @@ export const json_config = {
   acceptsChildren: true,
   isRoot: true,
   props: {
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "min-h-screen bg-white"
+    minHeight: {
+      type: "select",
+      label: "Min Height",
+      default: "100vh",
+      options: ["auto", "100vh", "100%"]
+    },
+    backgroundColor: {
+      type: "color",
+      label: "Background Color",
+      default: "#ffffff"
     }
   }
 };
 
-export default function Page({ children, className = "min-h-screen bg-white" }) {
-  return <div className={className}>{children}</div>;
+export default function Page({ children, minHeight = "100vh", backgroundColor = "#ffffff" }) {
+  return <div style={{ minHeight, backgroundColor }}>{children}</div>;
 }

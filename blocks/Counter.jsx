@@ -5,6 +5,7 @@ export const json_config = {
   label: "Counter",
   category: "Advanced",
   description: "Animated number counter",
+  icon: "fa-solid fa-hashtag",
   acceptsChildren: false,
   props: {
     number: {
@@ -28,17 +29,29 @@ export const json_config = {
       default: "2000",
       options: ["1000", "2000", "3000", "5000"]
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "text-4xl font-bold text-indigo-600"
+    fontSize: {
+      type: "select",
+      label: "Font Size",
+      default: "36",
+      options: ["24", "30", "36", "48", "60"]
+    },
+    fontWeight: {
+      type: "select",
+      label: "Font Weight",
+      default: "700",
+      options: ["400", "500", "600", "700", "800"]
+    },
+    color: {
+      type: "color",
+      label: "Color",
+      default: "#4f46e5"
     }
   }
 };
 
-export default function Counter({ number = 1000, prefix = "", suffix = "", duration = 2000, className = "text-4xl font-bold text-indigo-600" }) {
+export default function Counter({ number = 1000, prefix = "", suffix = "", duration = 2000, fontSize = "36", fontWeight = "700", color = "#4f46e5" }) {
   const [count, setCount] = React.useState(0);
-  
+
   React.useEffect(() => {
     let start = 0;
     const end = number;
@@ -54,9 +67,9 @@ export default function Counter({ number = 1000, prefix = "", suffix = "", durat
     }, 16);
     return () => clearInterval(timer);
   }, [number, duration]);
-  
+
   return (
-    <div className={className}>
+    <div style={{ fontSize: `${fontSize}px`, fontWeight, color }}>
       {prefix}{count.toLocaleString()}{suffix}
     </div>
   );

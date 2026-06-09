@@ -4,50 +4,56 @@ export const json_config = {
   type: "Tabs",
   label: "Tabs",
   category: "Advanced",
-  description: "Tabbed content",
-  acceptsChildren: false,
+  description: "Tabbed content container",
+  icon: "fa-solid fa-folder",
+  acceptsChildren: true,
   props: {
-    tabs: {
+    titles: {
       type: "textarea",
-      label: "Tabs (format: Title|Content per line)",
-      default: "Tab 1|Content for tab 1\nTab 2|Content for tab 2\nTab 3|Content for tab 3"
+      label: "Tab Titles (one per line)",
+      default: "Tab 1\nTab 2\nTab 3"
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: ""
+    activeColor: {
+      type: "color",
+      label: "Active Color",
+      default: "#4f46e5"
+    },
+    inactiveColor: {
+      type: "color",
+      label: "Inactive Color",
+      default: "#6b7280"
     }
   }
 };
 
-export default function Tabs({ tabs = "Tab 1|Content for tab 1\nTab 2|Content for tab 2\nTab 3|Content for tab 3", className = "" }) {
+export default function Tabs({ children, titles = "Tab 1\nTab 2\nTab 3", activeColor = "#4f46e5", inactiveColor = "#6b7280" }) {
   const [activeTab, setActiveTab] = React.useState(0);
-  const tabList = typeof tabs === "string" 
-    ? tabs.split("\n").filter(t => t.trim()).map(t => {
-      const [title, content] = t.split("|");
-      return { title: title?.trim() || "Tab", content: content?.trim() || "" };
-    })
-    : tabs;
-  
+  const childArray = React.Children.toArray(children);
+  const titleList = typeof titles === "string" ? titles.split("\n").filter(t => t.trim()) : titles;
+
   return (
-    <div className={className}>
-      <div className="flex border-b border-gray-200">
-        {tabList.map((tab, index) => (
+    <div>
+      <div style={{ display: "flex", borderBottom: "1px solid #e5e7eb" }}>
+        {titleList.map((title, index) => (
           <button
             key={index}
             onClick={() => setActiveTab(index)}
-            className={`px-4 py-2 font-medium ${
-              activeTab === index
-                ? "text-indigo-600 border-b-2 border-indigo-600"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
+            style={{
+              padding: "8px 16px",
+              fontWeight: "500",
+              color: activeTab === index ? activeColor : inactiveColor,
+              borderBottom: activeTab === index ? `2px solid ${activeColor}` : "none",
+              cursor: "pointer",
+              background: "none",
+              border: "none"
+            }}
           >
-            {tab.title}
+            {title}
           </button>
         ))}
       </div>
-      <div className="p-4">
-        <p>{tabList[activeTab]?.content || ""}</p>
+      <div style={{ padding: "16px" }}>
+        {childArray[activeTab] || null}
       </div>
     </div>
   );

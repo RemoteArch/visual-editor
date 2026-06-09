@@ -3,6 +3,7 @@ export const json_config = {
   label: "Flex Container",
   category: "Layout",
   description: "Flex container",
+  icon: "fa-solid fa-grip-lines-vertical",
   acceptsChildren: true,
   props: {
     direction: {
@@ -31,21 +32,25 @@ export const json_config = {
     },
     gap: {
       type: "select",
-      label: "Gap",
-      default: "4",
-      options: ["0", "2", "4", "6", "8", "12"]
-    },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: ""
+      label: "Gap (px)",
+      default: "16",
+      options: ["0", "8", "16", "24", "32"]
     }
   }
 };
 
-export default function FlexContainer({ children, direction = "row", justify = "start", align = "start", wrap = "nowrap", gap = "4", className = "" }) {
+export default function FlexContainer({ children, direction = "row", justify = "start", align = "start", wrap = "nowrap", gap = "16" }) {
   return (
-    <div className={`flex flex-${direction} justify-${justify} items-${align} flex-${wrap} gap-${gap} ${className}`}>
+    <div 
+      style={{
+        display: "flex",
+        flexDirection: direction,
+        justifyContent: justify,
+        alignItems: align,
+        flexWrap: wrap,
+        gap: `${gap}px`
+      }}
+    >
       {children}
     </div>
   );

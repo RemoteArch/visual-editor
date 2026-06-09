@@ -3,6 +3,7 @@ export const json_config = {
   label: "Divider",
   category: "Basic",
   description: "Horizontal divider line",
+  icon: "fa-solid fa-minus",
   acceptsChildren: false,
   props: {
     style: {
@@ -22,22 +23,23 @@ export const json_config = {
       label: "Color",
       default: "#e5e7eb"
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "my-8"
+    marginY: {
+      type: "select",
+      label: "Margin Y",
+      default: "32",
+      options: ["0", "16", "32", "48", "64"]
     }
   }
 };
 
-export default function Divider({ style = "solid", thickness = "1", color = "#e5e7eb", className = "my-8" }) {
+export default function Divider({ style = "solid", thickness = "1", color = "#e5e7eb", marginY = "32" }) {
   return (
     <hr
-      className={className}
       style={{
         borderStyle: style,
         borderWidth: `${thickness}px`,
-        borderColor: color
+        borderColor: color,
+        margin: `${marginY}px 0`
       }}
     />
   );

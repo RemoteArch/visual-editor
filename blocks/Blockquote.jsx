@@ -3,6 +3,7 @@ export const json_config = {
   label: "Blockquote",
   category: "Typography",
   description: "Blockquote citation",
+  icon: "fa-solid fa-quote-left",
   acceptsChildren: false,
   props: {
     content: {
@@ -15,19 +16,24 @@ export const json_config = {
       label: "Author",
       default: ""
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "border-l-4 border-indigo-500 pl-4 italic text-gray-700"
+    borderColor: {
+      type: "color",
+      label: "Border Color",
+      default: "#6366f1"
+    },
+    color: {
+      type: "color",
+      label: "Text Color",
+      default: "#374151"
     }
   }
 };
 
-export default function Blockquote({ content = "This is a blockquote. It's great for highlighting important text or citations.", author = "", className = "border-l-4 border-indigo-500 pl-4 italic text-gray-700" }) {
+export default function Blockquote({ content = "This is a blockquote. It's great for highlighting important text or citations.", author = "", borderColor = "#6366f1", color = "#374151" }) {
   return (
-    <blockquote className={className}>
+    <blockquote style={{ borderLeft: `4px solid ${borderColor}`, paddingLeft: "16px", fontStyle: "italic", color }}>
       <p>{content}</p>
-      {author && <cite className="text-sm text-gray-500">— {author}</cite>}
+      {author && <cite style={{ fontSize: "14px", color: "#6b7280" }}>— {author}</cite>}
     </blockquote>
   );
 }

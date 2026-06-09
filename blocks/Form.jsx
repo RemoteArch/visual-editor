@@ -3,6 +3,7 @@ export const json_config = {
   label: "Form",
   category: "Forms",
   description: "Form container",
+  icon: "fa-solid fa-file-signature",
   acceptsChildren: true,
   props: {
     action: {
@@ -16,17 +17,18 @@ export const json_config = {
       default: "POST",
       options: ["GET", "POST"]
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "space-y-4"
+    gap: {
+      type: "select",
+      label: "Gap (px)",
+      default: "16",
+      options: ["0", "8", "16", "24", "32"]
     }
   }
 };
 
-export default function Form({ children, action = "#", method = "POST", className = "space-y-4" }) {
+export default function Form({ children, action = "#", method = "POST", gap = "16" }) {
   return (
-    <form action={action} method={method} className={className}>
+    <form action={action} method={method} style={{ display: "flex", flexDirection: "column", gap: `${gap}px` }}>
       {children}
     </form>
   );

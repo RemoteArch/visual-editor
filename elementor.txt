@@ -1,0 +1,120 @@
+Container
+Grid
+Heading
+Text Editor
+Image
+Video
+Button
+Star Rating
+Divider
+Google Maps
+Icon
+Image Box
+Icon Box
+Basic Gallery
+Image Carousel
+Icon List
+Counter
+Spacer
+Testimonial
+Tabs
+Accordion
+Toggle
+Social Icons
+Progress Bar
+SoundCloud
+Shortcode
+HTML
+Menu Anchor
+Alert
+Sidebar
+Read More
+Text Path
+Loop Grid
+Loop Carousel
+Off-Canvas
+Posts
+Portfolio
+Slides
+Form
+Login
+Nav Menu
+Animated Headline
+Price Table
+Price List
+Gallery
+Flip Box
+Call To Action
+Media Carousel
+Testimonial Carousel
+Nested Carousel
+Table of Contents
+Countdown
+Facebook Page
+Blockquote
+Template
+Reviews
+Facebook Button
+Facebook Embed
+Facebook Comments
+PayPal Button
+Lottie
+Code Highlight
+Video Playlist
+Hotspot
+Progress Tracker
+Stripe Button
+Mega Menu
+Share Buttons
+Search Form
+Sitemap
+Author Box
+Post Title
+Post Excerpt
+Post Content
+Featured Image
+Post Comments
+Post Navigation
+Post Info
+Site Logo
+Site Title
+Page Title
+Search Bar
+Breadcrumbs
+Product
+Product Title
+Product Images
+Product Price
+Add To Cart
+Product Rating
+Product Stock
+Product Meta
+Short Description
+Product Data Tabs
+Additional Information
+Related Products
+Upsells
+Products
+Custom Add To Cart
+Product Categories
+Menu Cart
+Cart
+Checkout
+My Account
+Purchase Summary
+WooCommerce Notices
+Archive Title
+Archive Posts
+Archive Description
+Loop Item
+Loop Builder
+Site Search
+Taxonomy Filter
+Nested Tabs
+Nested Accordion
+Link in Bio
+Contact Buttons
+Floating Buttons
+Loop Filter
+Display Conditions
+Dynamic Tags

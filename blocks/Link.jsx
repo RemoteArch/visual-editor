@@ -3,6 +3,7 @@ export const json_config = {
   label: "Link",
   category: "Typography",
   description: "Text link",
+  icon: "fa-solid fa-link",
   acceptsChildren: false,
   props: {
     text: {
@@ -21,14 +22,14 @@ export const json_config = {
       default: "_self",
       options: ["_self", "_blank", "_parent", "_top"]
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "text-blue-600 hover:text-blue-800 underline"
+    color: {
+      type: "color",
+      label: "Color",
+      default: "#2563eb"
     }
   }
 };
 
-export default function Link({ text = "Click here", href = "#", target = "_self", className = "text-blue-600 hover:text-blue-800 underline" }) {
-  return <a href={href} target={target} className={className}>{text}</a>;
+export default function Link({ text = "Click here", href = "#", target = "_self", color = "#2563eb" }) {
+  return <a href={href} target={target} style={{ color, textDecoration: "underline" }}>{text}</a>;
 }

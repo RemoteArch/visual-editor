@@ -3,6 +3,7 @@ export const json_config = {
   label: "Call To Action",
   category: "Basic",
   description: "Call to action section",
+  icon: "fa-solid fa-bolt",
   acceptsChildren: false,
   props: {
     title: {
@@ -25,22 +26,35 @@ export const json_config = {
       label: "Button Link",
       default: "#"
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "p-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl text-white text-center"
+    backgroundColor: {
+      type: "color",
+      label: "Background Color",
+      default: "#4f46e5"
+    },
+    textColor: {
+      type: "color",
+      label: "Text Color",
+      default: "#ffffff"
     }
   }
 };
 
-export default function CallToAction({ title = "Get Started Today", description = "Join thousands of satisfied customers", buttonText = "Sign Up Now", buttonHref = "#", className = "p-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl text-white text-center" }) {
+export default function CallToAction({ title = "Get Started Today", description = "Join thousands of satisfied customers", buttonText = "Sign Up Now", buttonHref = "#", backgroundColor = "#4f46e5", textColor = "#ffffff" }) {
   return (
-    <div className={className}>
-      <h2 className="text-3xl font-bold mb-2">{title}</h2>
-      <p className="text-lg mb-6 opacity-90">{description}</p>
+    <div style={{ padding: "32px", backgroundColor, borderRadius: "12px", textAlign: "center", color: textColor }}>
+      <h2 style={{ fontSize: "30px", fontWeight: "700", marginBottom: "8px" }}>{title}</h2>
+      <p style={{ fontSize: "18px", marginBottom: "24px", opacity: 0.9 }}>{description}</p>
       <a
         href={buttonHref}
-        className="inline-block px-8 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+        style={{
+          display: "inline-block",
+          padding: "12px 32px",
+          backgroundColor: "#ffffff",
+          color: "#4f46e5",
+          fontWeight: "600",
+          borderRadius: "8px",
+          textDecoration: "none"
+        }}
       >
         {buttonText}
       </a>

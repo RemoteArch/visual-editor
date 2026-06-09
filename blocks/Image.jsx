@@ -3,6 +3,7 @@ export const json_config = {
   label: "Image",
   category: "Basic",
   description: "Image with optional caption",
+  icon: "fa-solid fa-image",
   acceptsChildren: false,
   props: {
     src: {
@@ -20,19 +21,26 @@ export const json_config = {
       label: "Caption",
       default: ""
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "w-full h-auto rounded-lg"
+    width: {
+      type: "select",
+      label: "Width",
+      default: "100",
+      options: ["50", "75", "100"]
+    },
+    borderRadius: {
+      type: "select",
+      label: "Border Radius",
+      default: "8",
+      options: ["0", "4", "8", "12", "16"]
     }
   }
 };
 
-export default function Image({ src = "https://placehold.co/600x400", alt = "Image", caption = "", className = "w-full h-auto rounded-lg" }) {
+export default function Image({ src = "https://placehold.co/600x400", alt = "Image", caption = "", width = "100", borderRadius = "8" }) {
   return (
-    <figure className={className}>
-      <img src={src} alt={alt} className="w-full h-auto" />
-      {caption && <figcaption className="text-center text-sm text-gray-500 mt-2">{caption}</figcaption>}
+    <figure style={{ width: `${width}%`, margin: "0" }}>
+      <img src={src} alt={alt} style={{ width: "100%", height: "auto", borderRadius: `${borderRadius}px` }} />
+      {caption && <figcaption style={{ textAlign: "center", fontSize: "14px", color: "#6b7280", marginTop: "8px" }}>{caption}</figcaption>}
     </figure>
   );
 }

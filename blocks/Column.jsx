@@ -3,16 +3,18 @@ export const json_config = {
   label: "Column",
   category: "Layout",
   description: "Single column",
+  icon: "fa-solid fa-grip-vertical",
   acceptsChildren: true,
   props: {
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: ""
+    padding: {
+      type: "select",
+      label: "Padding (px)",
+      default: "0",
+      options: ["0", "8", "16", "24", "32"]
     }
   }
 };
 
-export default function Column({ children, className = "" }) {
-  return <div className={className}>{children}</div>;
+export default function Column({ children, padding = "0" }) {
+  return <div style={{ padding: `${padding}px` }}>{children}</div>;
 }

@@ -3,6 +3,7 @@ export const json_config = {
   label: "Code",
   category: "Typography",
   description: "Code block",
+  icon: "fa-solid fa-code",
   acceptsChildren: false,
   props: {
     content: {
@@ -20,21 +21,16 @@ export const json_config = {
       type: "boolean",
       label: "Inline",
       default: false
-    },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: ""
     }
   }
 };
 
-export default function Code({ content = "console.log('Hello World');", language = "javascript", inline = false, className = "" }) {
+export default function Code({ content = "console.log('Hello World');", language = "javascript", inline = false }) {
   if (inline) {
-    return <code className={`bg-gray-100 px-1 py-0.5 rounded text-sm ${className}`}>{content}</code>;
+    return <code style={{ backgroundColor: "#f3f4f6", padding: "2px 4px", borderRadius: "4px", fontSize: "14px" }}>{content}</code>;
   }
   return (
-    <pre className={`bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto ${className}`}>
+    <pre style={{ backgroundColor: "#111827", color: "#f9fafb", padding: "16px", borderRadius: "8px", overflowX: "auto" }}>
       <code>{content}</code>
     </pre>
   );

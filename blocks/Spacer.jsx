@@ -3,21 +3,18 @@ export const json_config = {
   label: "Spacer",
   category: "Basic",
   description: "Vertical space",
+  icon: "fa-solid fa-arrows-up-down",
   acceptsChildren: false,
   props: {
     height: {
-      type: "string",
+      type: "select",
       label: "Height (px)",
-      default: "40"
-    },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: ""
+      default: "40",
+      options: ["10", "20", "40", "60", "80", "100"]
     }
   }
 };
 
-export default function Spacer({ height = "40", className = "" }) {
-  return <div className={className} style={{ height: `${height}px` }} aria-hidden="true" />;
+export default function Spacer({ height = "40" }) {
+  return <div style={{ height: `${height}px` }} aria-hidden="true" />;
 }

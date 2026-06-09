@@ -3,6 +3,7 @@ export const json_config = {
   label: "Button",
   category: "Basic",
   description: "Call-to-action button",
+  icon: "fa-solid fa-hand-pointer",
   acceptsChildren: false,
   props: {
     text: {
@@ -15,44 +16,71 @@ export const json_config = {
       label: "Link (href)",
       default: "#"
     },
-    variant: {
-      type: "select",
-      label: "Style",
-      default: "primary",
-      options: ["primary", "secondary", "outline", "ghost"]
+    backgroundColor: {
+      type: "color",
+      label: "Background Color",
+      default: "#2563eb"
     },
-    size: {
-      type: "select",
-      label: "Size",
-      default: "medium",
-      options: ["small", "medium", "large"]
+    textColor: {
+      type: "color",
+      label: "Text Color",
+      default: "#ffffff"
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: ""
+    paddingX: {
+      type: "select",
+      label: "Padding X",
+      default: "24",
+      options: ["16", "20", "24", "32"]
+    },
+    paddingY: {
+      type: "select",
+      label: "Padding Y",
+      default: "12",
+      options: ["8", "10", "12", "16"]
+    },
+    fontSize: {
+      type: "select",
+      label: "Font Size",
+      default: "16",
+      options: ["14", "16", "18"]
+    },
+    borderRadius: {
+      type: "select",
+      label: "Border Radius",
+      default: "8",
+      options: ["0", "4", "8", "12", "9999"]
     }
   }
 };
 
-export default function Button({ text = "Click Me", href = "#", variant = "primary", size = "medium", className = "" }) {
-  const variantStyles = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700",
-    secondary: "bg-gray-600 text-white hover:bg-gray-700",
-    outline: "border-2 border-blue-600 text-blue-600 hover:bg-blue-50",
-    ghost: "text-blue-600 hover:bg-blue-50"
-  };
-  const sizeStyles = {
-    small: "px-4 py-2 text-sm",
-    medium: "px-6 py-3 text-base",
-    large: "px-8 py-4 text-lg"
-  };
+export default function Button({ text = "Click Me", href = "#", backgroundColor = "#2563eb", textColor = "#ffffff", paddingX = "24", paddingY = "12", fontSize = "16", borderRadius = "8" }) {
   return (
     <a
       href={href}
-      className={`inline-block font-medium rounded-lg transition-colors ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+      style={{
+        display: "inline-block",
+        backgroundColor,
+        color: textColor,
+        padding: `${paddingY}px ${paddingX}px`,
+        fontSize: `${fontSize}px`,
+        fontWeight: "500",
+        borderRadius: `${borderRadius}px`,
+        textDecoration: "none",
+        transition: "background-color 0.2s"
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = adjustColor(backgroundColor, -20)}
+      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = backgroundColor}
     >
       {text}
     </a>
   );
+}
+
+function adjustColor(color, amount) {
+  const hex = color.replace('#', '');
+  const num = parseInt(hex, 16);
+  const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+  const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+  return `#${(1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1)}`;
 }

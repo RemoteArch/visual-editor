@@ -113,215 +113,43 @@ const immutableInsert = (root, parentId, index, newNode) => {
  * 3. JSX GENERATION
  * ============================================================= */
 
-const escapeAttr = (s) =>
-  String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 
 const generateJsx = (node, indent = 0) => {
-  if (!node) return "";
-  const pad = "  ".repeat(indent);
-  const propEntries = Object.entries(node.props || {}).filter(
-    ([, v]) => v !== undefined && v !== null && v !== ""
-  );
+  const spaces = "  ".repeat(indent);
 
-  const propsStr = propEntries
-    .map(([k, v]) => {
-      if (typeof v === "string") return `${k}="${escapeAttr(v)}"`;
-      if (typeof v === "boolean") return v ? k : `${k}={false}`;
-      if (typeof v === "number") return `${k}={${v}}`;
-      return `${k}={${JSON.stringify(v)}}`;
-    })
+  // Handle root type - use React Fragment
+  if (node.type === "root") {
+    const children = node.children || [];
+    if (children.length === 0) return "<></>";
+    const childrenJsx = children
+      .map((child) => generateJsx(child, indent))
+      .join("\n");
+    return `<>${childrenJsx ? "\n" + childrenJsx + "\n" : ""}</>`;
+  }
+
+  const props = Object.entries(node.props || {})
+    .map(([key, value]) => `${key}="${value}"`)
     .join(" ");
 
-  const open = `<${node.type}${propsStr ? " " + propsStr : ""}`;
+  const tagName = node.type;
+  const openTag = props ? `<${tagName} ${props}>` : `<${tagName}>`;
+  const selfClosingTag = props ? `<${tagName} ${props} />` : `<${tagName} />`;
+
   const children = node.children || [];
 
   if (children.length === 0) {
-    return `${pad}${open} />`;
+    return `${spaces}${selfClosingTag}`;
   }
-  const childrenStr = children
-    .map((c) => generateJsx(c, indent + 1))
+
+  const childrenJsx = children
+    .map((child) => generateJsx(child, indent + 1))
     .join("\n");
-  return `${pad}${open}>\n${childrenStr}\n${pad}</${node.type}>`;
+
+  return `${spaces}${openTag}\n${childrenJsx}\n${spaces}</${tagName}>`;
 };
 
 /* =============================================================
- * 4. SIMPLE JSX PARSER (handles builder-generated JSX)
- * ============================================================= */
-
-const parseJsx = (src) => {
-  const str = String(src || "").trim();
-  if (!str) return null;
-  let pos = 0;
-
-  const skipWs = () => {
-    while (pos < str.length && /\s/.test(str[pos])) pos++;
-  };
-
-  const readIdent = () => {
-    let s = "";
-    while (pos < str.length && /[A-Za-z0-9_$]/.test(str[pos])) s += str[pos++];
-    return s;
-  };
-
-  const readStringLiteral = (quote) => {
-    pos++; // consume opening quote
-    let s = "";
-    while (pos < str.length && str[pos] !== quote) {
-      if (str[pos] === "\\" && pos + 1 < str.length) {
-        s += str[pos + 1];
-        pos += 2;
-      } else {
-        s += str[pos++];
-      }
-    }
-    pos++; // consume closing quote
-    return s;
-  };
-
-  const readBracedExpr = () => {
-    pos++; // consume {
-    let depth = 1;
-    let s = "";
-    while (pos < str.length && depth > 0) {
-      const ch = str[pos];
-      if (ch === "{") {
-        depth++;
-        s += ch;
-        pos++;
-      } else if (ch === "}") {
-        depth--;
-        if (depth === 0) {
-          pos++;
-          break;
-        }
-        s += ch;
-        pos++;
-      } else if (ch === '"' || ch === "'" || ch === "`") {
-        const q = ch;
-        s += ch;
-        pos++;
-        while (pos < str.length && str[pos] !== q) {
-          if (str[pos] === "\\") {
-            s += str[pos] + (str[pos + 1] || "");
-            pos += 2;
-          } else {
-            s += str[pos++];
-          }
-        }
-        s += str[pos] || "";
-        pos++;
-      } else {
-        s += ch;
-        pos++;
-      }
-    }
-    const trimmed = s.trim();
-    try {
-      return JSON.parse(trimmed);
-    } catch {
-      try {
-        // eslint-disable-next-line no-new-func
-        return Function(`"use strict";return (${trimmed})`)();
-      } catch {
-        return trimmed;
-      }
-    }
-  };
-
-  const parseElement = () => {
-    skipWs();
-    if (str[pos] !== "<") return null;
-    pos++; // consume <
-    if (str[pos] === "/") return null; // closing tag, handled by caller
-
-    const tagName = readIdent();
-    if (!tagName) return null;
-
-    const props = {};
-    skipWs();
-
-    while (pos < str.length && str[pos] !== ">" && str[pos] !== "/") {
-      const propName = readIdent();
-      if (!propName) {
-        pos++;
-        continue;
-      }
-      skipWs();
-      if (str[pos] === "=") {
-        pos++;
-        skipWs();
-        if (str[pos] === '"' || str[pos] === "'") {
-          props[propName] = readStringLiteral(str[pos]);
-        } else if (str[pos] === "{") {
-          props[propName] = readBracedExpr();
-        }
-      } else {
-        props[propName] = true;
-      }
-      skipWs();
-    }
-
-    if (str[pos] === "/") {
-      pos++;
-      if (str[pos] === ">") pos++;
-      return { id: uid(), type: tagName, props, children: [] };
-    }
-
-    if (str[pos] === ">") pos++;
-
-    const children = [];
-    while (pos < str.length) {
-      skipWs();
-      if (str[pos] === "<" && str[pos + 1] === "/") {
-        pos += 2;
-        readIdent();
-        skipWs();
-        if (str[pos] === ">") pos++;
-        break;
-      }
-      if (str[pos] === "<") {
-        const child = parseElement();
-        if (child) children.push(child);
-        else break;
-      } else {
-        pos++;
-      }
-    }
-    return { id: uid(), type: tagName, props, children };
-  };
-
-  try {
-    return parseElement();
-  } catch (e) {
-    console.warn("[ReactVisualBuilder] JSX parse failed:", e);
-    return null;
-  }
-};
-
-/* =============================================================
- * 5. JSX SYNTAX HIGHLIGHTING (Tailwind classes)
- * ============================================================= */
-
-const highlightJsx = (jsx) => {
-  const escaped = jsx
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-  return escaped
-    .replace(
-      /(&lt;\/?)([A-Za-z][\w]*)/g,
-      '$1<span class="text-pink-400">$2</span>'
-    )
-    .replace(
-      /(\s)([a-zA-Z][a-zA-Z0-9]*)(=)/g,
-      '$1<span class="text-amber-300">$2</span>$3'
-    )
-    .replace(/("[^"]*")/g, '<span class="text-emerald-400">$1</span>')
-    .replace(/(\{[^}]*\})/g, '<span class="text-slate-400">$1</span>');
-};
-
-/* =============================================================
- * 6. SUB-COMPONENTS
+ * 4. SUB-COMPONENTS
  * ============================================================= */
 
 function Toolbar({
@@ -331,8 +159,10 @@ function Toolbar({
   setPreviewMode,
   showJsx,
   setShowJsx,
-  onExport,
+  onExportJson,
+  onExportJsx,
   jsx,
+  tree,
   canUndo,
   canRedo,
   undo,
@@ -405,10 +235,13 @@ function Toolbar({
       </button>
       <button
         className="inline-flex items-center gap-1.5 h-7 px-3 rounded-md text-xs bg-indigo-600 hover:bg-indigo-500 text-white transition-colors font-medium"
-        onClick={() => onExport && onExport(jsx)}
-        title="Export JSX"
+        onClick={() => {
+          if (onExportJson) onExportJson(tree);
+          if (onExportJsx) onExportJsx(jsx);
+        }}
+        title="Export"
       >
-        ⤓ Export JSX
+        ⤓ Export
       </button>
     </div>
   );
@@ -458,16 +291,8 @@ function BlocksLibrary({ registry, onAddBlock }) {
             {blocks.map((b) => (
               <div
                 key={b.name}
-                className="bg-zinc-800 border border-zinc-700 rounded-md py-2.5 px-2 flex flex-col items-center gap-1 cursor-grab select-none hover:border-indigo-500 hover:bg-zinc-700/60 transition-colors active:cursor-grabbing"
-                draggable
-                onDragStart={(e) => {
-                  e.dataTransfer.setData(
-                    "application/x-rvb",
-                    JSON.stringify({ kind: "new", blockName: b.name })
-                  );
-                  e.dataTransfer.effectAllowed = "copy";
-                }}
-                onDoubleClick={() => onAddBlock(b.name)}
+                className="bg-zinc-800 border border-zinc-700 rounded-md py-2.5 px-2 flex flex-col items-center gap-1 cursor-pointer select-none hover:border-indigo-500 hover:bg-zinc-700/60 transition-colors"
+                onClick={() => onAddBlock(b.name)}
                 title={b.description}
               >
                 <span className="text-base text-indigo-400 leading-none">
@@ -657,19 +482,44 @@ function PropsInspector({
                   onChange={(e) => setProp(key, e.target.value)}
                 />
               )}
-              {field.type === "select" && (
-                <select
-                  className={inputBase}
-                  value={value}
-                  onChange={(e) => setProp(key, e.target.value)}
-                >
-                  {(field.options || []).map((o) => (
-                    <option key={o} value={o}>
-                      {o}
-                    </option>
-                  ))}
-                </select>
-              )}
+              {field.type === "select" && (() => {
+                const [customValue, setCustomValue] = React.useState("");
+                const isOther = value === "other" || !(field.options || []).includes(value);
+                
+                return (
+                  <div>
+                    <select
+                      className={inputBase}
+                      value={isOther ? "other" : value}
+                      onChange={(e) => {
+                        if (e.target.value === "other") {
+                          setProp(key, "other");
+                        } else {
+                          setProp(key, e.target.value);
+                          setCustomValue("");
+                        }
+                      }}
+                    >
+                      {(field.options || []).map((o) => (
+                        <option key={o} value={o}>
+                          {o}
+                        </option>
+                      ))}
+                      <option value="other">Other...</option>
+                    </select>
+                    {isOther && (
+                      <input
+                        className={`${inputBase} mt-2`}
+                        type="text"
+                        placeholder="Enter custom value (e.g., 100vh, 50%, 2rem)"
+                        value={value === "other" ? customValue : value}
+                        onChange={(e) => setCustomValue(e.target.value)}
+                        onBlur={(e) => setProp(key, e.target.value)}
+                      />
+                    )}
+                  </div>
+                );
+              })()}
               {(field.type === "string" ||
                 field.type === "classes" ||
                 !field.type) && (
@@ -702,9 +552,87 @@ function PropsInspector({
                   </span>
                 </label>
               )}
+              {field.type === "color" && (
+                <input
+                  className={inputBase}
+                  type="color"
+                  value={value}
+                  onChange={(e) => setProp(key, e.target.value)}
+                  style={{ height: "32px", padding: "2px" }}
+                />
+              )}
+              {field.type === "int" && (
+                <input
+                  className={inputBase}
+                  type="number"
+                  value={value}
+                  onChange={(e) => setProp(key, parseInt(e.target.value) || 0)}
+                  step="1"
+                />
+              )}
+              {field.type === "double" && (
+                <input
+                  className={inputBase}
+                  type="number"
+                  value={value}
+                  onChange={(e) => setProp(key, parseFloat(e.target.value) || 0)}
+                  step="0.01"
+                />
+              )}
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Context Menu ---------- */
+
+function ContextMenu({ x, y, registry, onAddBlock, onClose }) {
+  const menuRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        onClose();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
+
+  const groups = {};
+  Object.values(registry).forEach((b) => {
+    const cat = b.category || "Other";
+    groups[cat] = groups[cat] || [];
+    groups[cat].push(b);
+  });
+
+  return (
+    <div
+      ref={menuRef}
+      className="fixed bg-zinc-800 border border-zinc-700 rounded-md shadow-xl z-50 min-w-[200px]"
+      style={{ left: x, top: y }}
+    >
+      <div className="p-1">
+        {Object.entries(groups).map(([cat, blocks]) => (
+          <div key={cat}>
+            <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold px-2 py-1">
+              {cat}
+            </div>
+            {blocks.map((b) => (
+              <button
+                key={b.name}
+                className="w-full text-left px-2 py-1.5 text-xs text-zinc-100 hover:bg-zinc-700 rounded flex items-center gap-2"
+                onClick={() => onAddBlock(b.name)}
+              >
+                <span className="text-indigo-400">{b.icon}</span>
+                <span>{b.name}</span>
+              </button>
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -721,12 +649,34 @@ function NodeWrapper({
   onSelect,
   onDuplicate,
   onRemove,
-  onMove,
   onAddBlock,
   previewMode,
-  dropTarget,
-  setDropTarget,
+  onContextMenu,
 }) {
+  // Handle root type - just render children without wrapper
+  if (node.type === "root") {
+    return (
+      <>
+        {(node.children || []).map((c) => (
+          <NodeWrapper
+            key={c.id}
+            node={c}
+            registry={registry}
+            selectedId={selectedId}
+            hoveredId={hoveredId}
+            setHoveredId={setHoveredId}
+            onSelect={onSelect}
+            onDuplicate={onDuplicate}
+            onRemove={onRemove}
+            onAddBlock={onAddBlock}
+            previewMode={previewMode}
+            onContextMenu={onContextMenu}
+          />
+        ))}
+      </>
+    );
+  }
+
   const meta = registry[node.type];
   if (!meta) {
     return (
@@ -752,11 +702,9 @@ function NodeWrapper({
       onSelect={onSelect}
       onDuplicate={onDuplicate}
       onRemove={onRemove}
-      onMove={onMove}
       onAddBlock={onAddBlock}
       previewMode={previewMode}
-      dropTarget={dropTarget}
-      setDropTarget={setDropTarget}
+      onContextMenu={onContextMenu}
     />
   ));
 
@@ -768,8 +716,14 @@ function NodeWrapper({
     (!node.children || node.children.length === 0)
   ) {
     renderedChildren = (
-      <div className="m-1 py-6 px-3 border-2 border-dashed border-gray-300 rounded text-center text-gray-400 text-xs">
-        Drop blocks here
+      <div 
+        className="m-1 py-12 px-3 border-2 border-dashed border-gray-300 rounded text-center text-gray-400 text-xs min-h-[200px] flex items-center justify-center"
+        onContextMenu={(e) => {
+          e.preventDefault();
+          onContextMenu(e, node.id);
+        }}
+      >
+        Right-click to add blocks
       </div>
     );
   }
@@ -779,80 +733,7 @@ function NodeWrapper({
     return <Comp {...node.props}>{renderedChildren}</Comp>;
   }
 
-  const handleDragStart = (e) => {
-    if (isRoot) {
-      e.preventDefault();
-      return;
-    }
-    e.stopPropagation();
-    e.dataTransfer.setData(
-      "application/x-rvb",
-      JSON.stringify({ kind: "move", nodeId: node.id })
-    );
-    e.dataTransfer.effectAllowed = "move";
-  };
 
-  const computePosition = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const h = rect.height;
-    let position;
-    if (meta.allowChildren) {
-      if (y < h * 0.2) position = "before";
-      else if (y > h * 0.8) position = "after";
-      else position = "inside";
-    } else {
-      position = y < h / 2 ? "before" : "after";
-    }
-    if (isRoot && position !== "inside") position = "inside";
-    return position;
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.dataTransfer.dropEffect = "move";
-    const position = computePosition(e);
-    if (
-      !dropTarget ||
-      dropTarget.id !== node.id ||
-      dropTarget.position !== position
-    ) {
-      setDropTarget({ id: node.id, position });
-    }
-  };
-
-  const handleDragLeave = (e) => {
-    if (e.currentTarget.contains(e.relatedTarget)) return;
-    if (dropTarget && dropTarget.id === node.id) setDropTarget(null);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const raw = e.dataTransfer.getData("application/x-rvb");
-    if (!raw) {
-      setDropTarget(null);
-      return;
-    }
-    let payload;
-    try {
-      payload = JSON.parse(raw);
-    } catch {
-      setDropTarget(null);
-      return;
-    }
-    const position = computePosition(e);
-    if (payload.kind === "new") {
-      onAddBlock(payload.blockName, node.id, position);
-    } else if (payload.kind === "move") {
-      onMove(payload.nodeId, node.id, position);
-    }
-    setDropTarget(null);
-  };
-
-  const showIndicator =
-    dropTarget && dropTarget.id === node.id ? dropTarget.position : null;
 
   // Selection / hover ring via Tailwind
   const ringClass = isSelected
@@ -865,11 +746,12 @@ function NodeWrapper({
     <div
       data-node-id={node.id}
       className={`relative ${ringClass}`}
-      draggable={!isRoot}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      onContextMenu={(e) => {
+        if (meta.allowChildren) {
+          e.preventDefault();
+          onContextMenu(e, node.id);
+        }
+      }}
       onMouseEnter={(e) => {
         e.stopPropagation();
         setHoveredId(node.id);
@@ -890,61 +772,45 @@ function NodeWrapper({
           <div className="absolute -top-6 left-0 bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded font-semibold uppercase tracking-wider z-50 pointer-events-none">
             {node.type}
           </div>
-          {!isRoot && (
-            <div className="absolute -top-6 right-0 flex gap-0.5 bg-indigo-500 rounded p-0.5 z-50 shadow-md">
+          <div className="absolute -top-6 right-0 flex gap-0.5 bg-indigo-500 rounded p-0.5 z-50 shadow-md">
+            {meta.allowChildren && (
               <button
                 className="w-5 h-5 inline-flex items-center justify-center text-white text-xs hover:bg-white/20 rounded"
-                title="Duplicate"
+                title="Add child"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDuplicate(node.id);
+                  onContextMenu(e, node.id);
                 }}
               >
-                ⎘
+                +
               </button>
-              <button
-                className="w-5 h-5 inline-flex items-center justify-center text-white text-xs hover:bg-white/20 rounded"
-                title="Move up"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMove(node.id, null, "up");
-                }}
-              >
-                ↑
-              </button>
-              <button
-                className="w-5 h-5 inline-flex items-center justify-center text-white text-xs hover:bg-white/20 rounded"
-                title="Move down"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMove(node.id, null, "down");
-                }}
-              >
-                ↓
-              </button>
-              <button
-                className="w-5 h-5 inline-flex items-center justify-center text-white text-xs hover:bg-white/20 rounded"
-                title="Delete"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemove(node.id);
-                }}
-              >
-                ×
-              </button>
-            </div>
-          )}
+            )}
+            {!isRoot && (
+              <>
+                <button
+                  className="w-5 h-5 inline-flex items-center justify-center text-white text-xs hover:bg-white/20 rounded"
+                  title="Duplicate"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDuplicate(node.id);
+                  }}
+                >
+                  ⎘
+                </button>
+                <button
+                  className="w-5 h-5 inline-flex items-center justify-center text-white text-xs hover:bg-white/20 rounded"
+                  title="Delete"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove(node.id);
+                  }}
+                >
+                  ×
+                </button>
+              </>
+            )}
+          </div>
         </>
-      )}
-
-      {showIndicator === "before" && (
-        <div className="absolute left-0 right-0 -top-px h-1 bg-indigo-500 z-50 pointer-events-none shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
-      )}
-      {showIndicator === "after" && (
-        <div className="absolute left-0 right-0 -bottom-px h-1 bg-indigo-500 z-50 pointer-events-none shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
-      )}
-      {showIndicator === "inside" && (
-        <div className="absolute inset-0 bg-indigo-500/10 border-2 border-dashed border-indigo-500 pointer-events-none z-40" />
       )}
     </div>
   );
@@ -955,10 +821,11 @@ function NodeWrapper({
  * ============================================================= */
 
 function ReactVisualBuilder({
-  initialJsx,
+  initialTree,
   blocks,
   onChange,
-  onExport,
+  onExportJson,
+  onExportJsx,
 }) {
   // Build registry (user blocks override defaults of the same name)
   const registry = useMemo(() => {
@@ -975,16 +842,15 @@ function ReactVisualBuilder({
     return map;
   }, [blocks]);
 
-  // Initial tree (from initialJsx if provided)
-  const initialTree = useMemo(() => {
-    if (initialJsx) {
-      const parsed = parseJsx(initialJsx);
-      if (parsed) return ensureIds(parsed);
+  // Initial tree (from initialTree if provided)
+  const treeInitialState = useMemo(() => {
+    if (initialTree) {
+      return ensureIds(initialTree);
     }
     return {
-      id: uid(),
-      type: "Page",
-      props: { className: "min-h-full bg-white" },
+      id: "root",
+      type: "root",
+      props: {},
       children: [],
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -993,10 +859,31 @@ function ReactVisualBuilder({
   // Undo / redo history
   const [history, setHistory] = useState({
     past: [],
-    present: initialTree,
+    present: treeInitialState,
     future: [],
   });
   const tree = history.present;
+
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState(null);
+
+  const handleContextMenu = (e, nodeId) => {
+    e.preventDefault();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      nodeId,
+    });
+  };
+
+  const closeContextMenu = () => setContextMenu(null);
+
+  const handleAddBlockFromMenu = (blockName) => {
+    if (contextMenu) {
+      addBlock(blockName, contextMenu.nodeId, "inside");
+      closeContextMenu();
+    }
+  };
 
   const pushTree = useCallback((newTree) => {
     setHistory((h) => ({
@@ -1030,9 +917,8 @@ function ReactVisualBuilder({
     });
   }, []);
 
-  const [selectedId, setSelectedId] = useState(initialTree.id);
+  const [selectedId, setSelectedId] = useState(treeInitialState.id);
   const [hoveredId, setHoveredId] = useState(null);
-  const [dropTarget, setDropTarget] = useState(null);
   const [device, setDevice] = useState("desktop");
   const [previewMode, setPreviewMode] = useState(false);
   const [showJsx, setShowJsx] = useState(false);
@@ -1041,12 +927,12 @@ function ReactVisualBuilder({
   // Generated JSX
   const jsx = useMemo(() => generateJsx(tree, 0), [tree]);
 
-  // onChange notification
+  // onChange notification (sends JSON tree)
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   useEffect(() => {
-    if (onChangeRef.current) onChangeRef.current(jsx);
-  }, [jsx]);
+    if (onChangeRef.current) onChangeRef.current(tree);
+  }, [tree]);
 
   /* ---------- Actions ---------- */
 
@@ -1132,66 +1018,7 @@ function ReactVisualBuilder({
     [tree, registry, pushTree]
   );
 
-  const moveNode = useCallback(
-    (sourceId, targetId, position) => {
-      if (sourceId === tree.id) return;
-      if (sourceId === targetId) return;
 
-      // Up / Down quick moves
-      if (position === "up" || position === "down") {
-        const parent = findParent(tree, sourceId);
-        if (!parent) return;
-        const idx = parent.children.findIndex((c) => c.id === sourceId);
-        const newIdx = position === "up" ? idx - 1 : idx + 1;
-        if (newIdx < 0 || newIdx >= parent.children.length) return;
-        const node = parent.children[idx];
-        const removed = immutableRemove(tree, sourceId);
-        pushTree(immutableInsert(removed, parent.id, newIdx, node));
-        return;
-      }
-
-      const sourceNode = findNode(tree, sourceId);
-      if (!sourceNode) return;
-      if (isDescendant(sourceNode, targetId)) return;
-
-      const targetNode = findNode(tree, targetId);
-      if (!targetNode) return;
-      const targetMeta = registry[targetNode.type];
-
-      let newParentId;
-      let newIndex;
-
-      if (position === "inside") {
-        if (!targetMeta || !targetMeta.allowChildren) return;
-        newParentId = targetId;
-        newIndex = -1;
-      } else {
-        const parent = findParent(tree, targetId);
-        if (!parent) return;
-        const idx = parent.children.findIndex((c) => c.id === targetId);
-        newParentId = parent.id;
-        newIndex = position === "before" ? idx : idx + 1;
-      }
-
-      const removedTree = immutableRemove(tree, sourceId);
-
-      // Adjust index if source was sibling of target in same parent
-      if (position !== "inside") {
-        const newParent = findNode(removedTree, newParentId);
-        if (newParent) {
-          const targetIdx = newParent.children.findIndex(
-            (c) => c.id === targetId
-          );
-          if (targetIdx >= 0) {
-            newIndex = position === "before" ? targetIdx : targetIdx + 1;
-          }
-        }
-      }
-
-      pushTree(immutableInsert(removedTree, newParentId, newIndex, sourceNode));
-    },
-    [tree, registry, pushTree]
-  );
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1235,30 +1062,6 @@ function ReactVisualBuilder({
     return () => window.removeEventListener("keydown", handler);
   }, [selectedId, tree.id, undo, redo, removeNode, duplicateNode]);
 
-  /* ---------- Root drop zone ---------- */
-
-  const handleRootDragOver = (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  };
-  const handleRootDrop = (e) => {
-    e.preventDefault();
-    const raw = e.dataTransfer.getData("application/x-rvb");
-    if (!raw) return;
-    let payload;
-    try {
-      payload = JSON.parse(raw);
-    } catch {
-      return;
-    }
-    if (payload.kind === "new") {
-      addBlock(payload.blockName, tree.id, "inside");
-    } else if (payload.kind === "move") {
-      moveNode(payload.nodeId, tree.id, "inside");
-    }
-    setDropTarget(null);
-  };
-
   const selectedNode = selectedId ? findNode(tree, selectedId) : null;
 
   const frameStyle =
@@ -1282,8 +1085,10 @@ function ReactVisualBuilder({
         setPreviewMode={setPreviewMode}
         showJsx={showJsx}
         setShowJsx={setShowJsx}
-        onExport={onExport}
+        onExportJson={onExportJson}
+        onExportJsx={onExportJsx}
         jsx={jsx}
+        tree={tree}
         canUndo={history.past.length > 0}
         canRedo={history.future.length > 0}
         undo={undo}
@@ -1317,7 +1122,19 @@ function ReactVisualBuilder({
             {leftTab === "blocks" ? (
               <BlocksLibrary
                 registry={registry}
-                onAddBlock={(name) => addBlock(name, tree.id, "inside")}
+                onAddBlock={(name) => {
+                  const selectedNode = selectedId ? findNode(tree, selectedId) : null;
+                  if (selectedNode) {
+                    const meta = registry[selectedNode.type];
+                    if (meta && meta.allowChildren) {
+                      addBlock(name, selectedId, "inside");
+                    } else {
+                      addBlock(name, tree.id, "inside");
+                    }
+                  } else {
+                    addBlock(name, tree.id, "inside");
+                  }
+                }}
               />
             ) : (
               <LayersPanel
@@ -1334,8 +1151,6 @@ function ReactVisualBuilder({
 
         <div
           className="flex-1 bg-zinc-950 flex flex-col min-w-0 overflow-hidden"
-          onDragOver={handleRootDragOver}
-          onDrop={handleRootDrop}
         >
           <div className="flex-1 overflow-auto p-6 flex justify-center items-start">
             <div
@@ -1352,11 +1167,9 @@ function ReactVisualBuilder({
                 onSelect={setSelectedId}
                 onDuplicate={duplicateNode}
                 onRemove={removeNode}
-                onMove={moveNode}
                 onAddBlock={addBlock}
                 previewMode={previewMode}
-                dropTarget={dropTarget}
-                setDropTarget={setDropTarget}
+                onContextMenu={handleContextMenu}
               />
             </div>
           </div>
@@ -1380,6 +1193,16 @@ function ReactVisualBuilder({
           </div>
         )}
       </div>
+
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          registry={registry}
+          onAddBlock={handleAddBlockFromMenu}
+          onClose={closeContextMenu}
+        />
+      )}
 
       {showJsx && (
         <div
@@ -1407,7 +1230,10 @@ function ReactVisualBuilder({
                 </button>
                 <button
                   className="inline-flex items-center gap-1 h-7 px-3 rounded-md text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium"
-                  onClick={() => onExport && onExport(jsx)}
+                  onClick={() => {
+                    if (onExportJson) onExportJson(tree);
+                    if (onExportJsx) onExportJsx(jsx);
+                  }}
                 >
                   ⤓ Export
                 </button>
@@ -1421,8 +1247,9 @@ function ReactVisualBuilder({
             </div>
             <pre
               className="flex-1 overflow-auto m-0 p-4 font-mono text-xs leading-relaxed text-indigo-200 bg-zinc-950 whitespace-pre"
-              dangerouslySetInnerHTML={{ __html: highlightJsx(jsx) }}
-            />
+            >
+              {jsx}
+            </pre>
           </div>
         </div>
       )}
@@ -1431,4 +1258,3 @@ function ReactVisualBuilder({
 }
 
 export default ReactVisualBuilder;
-export { DEFAULT_BLOCKS, generateJsx, parseJsx };

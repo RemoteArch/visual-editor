@@ -3,6 +3,7 @@ export const json_config = {
   label: "Input",
   category: "Forms",
   description: "Text input field",
+  icon: "fa-solid fa-keyboard",
   acceptsChildren: false,
   props: {
     type: {
@@ -26,23 +27,35 @@ export const json_config = {
       label: "Required",
       default: false
     },
-    className: {
-      type: "classes",
-      label: "Tailwind classes",
-      default: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+    borderColor: {
+      type: "color",
+      label: "Border Color",
+      default: "#d1d5db"
+    },
+    borderRadius: {
+      type: "select",
+      label: "Border Radius",
+      default: "8",
+      options: ["0", "4", "8", "12"]
     }
   }
 };
 
-export default function Input({ type = "text", label = "Label", placeholder = "Enter text...", required = false, className = "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" }) {
+export default function Input({ type = "text", label = "Label", placeholder = "Enter text...", required = false, borderColor = "#d1d5db", borderRadius = "8" }) {
   return (
     <div>
-      {label && <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>}
+      {label && <label style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>{label}</label>}
       <input
         type={type}
         placeholder={placeholder}
         required={required}
-        className={className}
+        style={{
+          width: "100%",
+          padding: "8px 16px",
+          border: `1px solid ${borderColor}`,
+          borderRadius: `${borderRadius}px`,
+          outline: "none"
+        }}
       />
     </div>
   );
